@@ -1,0 +1,40 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+cat > .gitignore << 'EOF'
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment variables
+.env
+
+# Logs
+aviation_logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# External/other projects
+VMS-TSL/
+
+# Temporary files
+get-pip.py
+Openrouter_test.py
+ai.py
+
+# Test files
+*_test.py
