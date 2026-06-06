@@ -29,6 +29,10 @@ gcp = [
     "google-cloud-storage==2.19.0",
 ]
 
+[tool.setuptools.packages.find]
+include = ["aviation*"]
+namespaces = false
+
 [tool.ruff]
 target-version = "py311"
 line-length = 100
