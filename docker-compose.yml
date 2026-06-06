@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: sms-engine
+    ports:
+      - "8000:8080"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-sms-engine-dev}
+      - GCS_BUCKET_NAME=${GCS_BUCKET_NAME:-sms-engine-audit-logs}
+      - PYTHONPATH=/app
+      - PORT=8080
+    volumes:
+      - ./aviation_logs:/app/aviation_logs
+    restart: unless-stopped

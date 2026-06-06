@@ -1,0 +1,15 @@
+{
+  "displayName": "SMS-Engine API Downtime",
+  "conditions": [{
+    "displayName": "Uptime check failed",
+    "conditionAbsent": {
+      "filter": "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" AND resource.type=\"uptime_url\" AND metric.labels.check_id=\"sms-engine-api-health-ZDkWiznxKhg\"",
+      "duration": "120s",
+      "trigger": {"count": 1}
+    }
+  }],
+  "alertStrategy": {"autoClose": "1800s"},
+  "notificationChannels": [],
+  "severity": "CRITICAL",
+  "combiner": "OR"
+}

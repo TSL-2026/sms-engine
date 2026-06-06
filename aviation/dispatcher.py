@@ -12,9 +12,12 @@
 #   - Audit logging with schema validation
 # ============================================================
 
+import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from aviation.prompts import AVIATION_SYSTEM_PROMPT
+
+logger = logging.getLogger("sms.aviation.dispatcher")
 from aviation.client import OpenRouterClient
 from aviation.human_factors.imsafe import evaluate_imsafe
 from aviation.risk.pave import evaluate_pave
@@ -162,7 +165,7 @@ class AviationDispatcher:
         Build structured JSON response with clear schema
         """
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "input_scenario": user_input,
             "decision": {
                 "state": enforced_state,
@@ -237,7 +240,7 @@ Provide a concise operational briefing (2-3 sentences) explaining the decision a
         Log decision with structured schema for traceability
         """
         audit_record = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "input": user_input,
             "assessment": {
                 "imsafe": imsafe_result,
@@ -297,7 +300,7 @@ Provide a concise operational briefing (2-3 sentences) explaining the decision a
     # ========================================================
     def _error_response(self, error_code: str, message: str) -> Dict:
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "error": error_code,
             "message": message,
             "decision": {"state": "ERROR", "confidence": 0}

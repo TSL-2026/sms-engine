@@ -5,7 +5,7 @@
 # ============================================================
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any
 
 class SafetyDashboard:
@@ -22,7 +22,7 @@ class SafetyDashboard:
     
     def add_assessment(self, assessment_data: Dict[str, Any]):
         """Add a new safety assessment to the dashboard"""
-        assessment_data['timestamp'] = datetime.now().isoformat()
+        assessment_data['timestamp'] = datetime.now(timezone.utc).isoformat()
         self.assessments.append(assessment_data)
         
         # Update metrics

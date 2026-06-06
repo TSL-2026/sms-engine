@@ -6,7 +6,7 @@
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class DecisionAuditLogger:
@@ -19,7 +19,7 @@ class DecisionAuditLogger:
         os.makedirs(self.log_dir, exist_ok=True)
 
     def log(self, record: dict):
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         record_with_meta = {
             "timestamp_utc": timestamp,

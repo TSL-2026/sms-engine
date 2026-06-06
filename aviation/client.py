@@ -6,8 +6,11 @@
 # ============================================================
 
 import os
+import logging
 import requests
 import json
+
+logger = logging.getLogger("sms.aviation.client")
 
 
 class OpenRouterClient:
@@ -61,10 +64,7 @@ class OpenRouterClient:
             "max_tokens": 500
         }
 
-        # Debug logging (remove in production)
-        print(f"DEBUG: Sending request to OpenRouter")
-        print(f"DEBUG: Model: {model_to_use}")
-        print(f"DEBUG: Messages count: {len(messages)}")
+        logger.debug("Sending request to OpenRouter — model=%s, messages=%d", model_to_use, len(messages))
 
         try:
             response = requests.post(
@@ -74,8 +74,7 @@ class OpenRouterClient:
                 timeout=30  # Add timeout to prevent hanging
             )
 
-            # Debug response
-            print(f"DEBUG: Response status code: {response.status_code}")
+            logger.debug("OpenRouter response status=%d", response.status_code)
 
             # Handle non-200 responses
             if response.status_code != 200:
@@ -124,21 +123,66 @@ class OpenRouterClient:
             raise Exception(f"Unexpected API response format: {str(e)}")
 
 
+class SmartAIClient:
+    """Select optimal AI model based on scenario complexity"""
+
+    SIMPLE_PATTERNS = ['vfr', 'day', 'clear weather', 'rested', 'familiar', 'short', 'direct']
+    COMPLEX_PATTERNS = ['imc', 'night', 'mountain', 'emergency', 'fatigue', 'mechanical',
+                        'icing', 'wind shear', 'crosswind', 'low fuel', 'maintenance',
+                        'deferred', 'pressure', 'illness', 'medication', 'alcohol', 'stress']
+
+    def __init__(self, base_client: OpenRouterClient = None):
+        self.client = base_client or OpenRouterClient()
+
+    def select_model(self, scenario: str) -> str:
+        scenario_lower = scenario.lower()
+
+        if any(p in scenario_lower for p in self.SIMPLE_PATTERNS):
+            return "claude-3-haiku-20240307"
+
+        complexity = sum(p in scenario_lower for p in self.COMPLEX_PATTERNS)
+        if complexity >= 3:
+            return "claude-3-sonnet-20240229"
+        if complexity >= 1:
+            return "claude-3-haiku-20240307"
+
+        return "claude-3-haiku-20240307"
+
+    def get_assessment(self, scenario: str) -> str:
+        model = self.select_model(scenario)
+        system_prompt = (
+            "You are an aviation safety expert. Analyze the flight scenario and "
+            "provide a concise risk assessment. Include: hazards identified, "
+            "risk level, and recommended mitigations."
+        )
+        return self.client.chat_simple(scenario, system_message=system_prompt, model=model)
+
+
 # Optional: Test the client if run directly
 if __name__ == "__main__":
-    # Test code
-    print("Testing OpenRouter Client...")
+    import sys
+
+    def test_model_selection():
+        client = SmartAIClient.__new__(SmartAIClient)
+
+        assert client.select_model("Day VFR, familiar airport") == "claude-3-haiku-20240307"
+        assert client.select_model("Night IMC, mountain terrain, low fuel") == "claude-3-sonnet-20240229"
+        assert client.select_model("Clear weather, short flight") == "claude-3-haiku-20240307"
+        assert client.select_model("Emergency descent, engine failure, night, IMC") == "claude-3-sonnet-20240229"
+        print("All model selection tests passed!")
+
+    print("Testing SmartAIClient...")
     try:
+        test_model_selection()
         client = OpenRouterClient()
-        print("✓ Client initialized successfully")
-        print(f"✓ Default model: {client.default_model}")
-        
-        # Uncomment to test actual API call (requires API key)
-        # response = client.chat_simple(
-        #     "Say 'Hello, Aviation Safety System!'",
-        #     system_message="You are a helpful assistant."
-        # )
-        # print(f"✓ API Response: {response}")
-        
+        print(f"✓ Base client: {client.default_model}")
+        smart = SmartAIClient(client)
+        scenario = "Day VFR, pilot rested"
+        model = smart.select_model(scenario)
+        print(f"✓ Scenario: '{scenario}' → {model}")
+        scenario2 = "Night IMC, mountain, low fuel, mechanical issue"
+        model2 = smart.select_model(scenario2)
+        print(f"✓ Scenario: '{scenario2}' → {model2}")
+        print("✓ All tests passed!")
     except Exception as e:
         print(f"✗ Error: {e}")

@@ -11,6 +11,7 @@
 
 from aviation.dispatcher import AviationDispatcher
 from aviation.analytics.safety_dashboard import SafetyDashboard
+from aviation.cache.response_cache import AssessmentCache
 
 
 class AviationSafetySystem:
@@ -18,15 +19,22 @@ class AviationSafetySystem:
     def __init__(self):
         self.dispatcher = AviationDispatcher()
         self.dashboard = SafetyDashboard()
+        self.cache = AssessmentCache()
 
     # -------------------------------
     # REAL-TIME DECISION ENGINE
     # -------------------------------
     def assess_flight(self, scenario: str):
         """
-        Main operational safety evaluation endpoint.
+        Main operational safety evaluation endpoint with caching.
         """
-        return self.dispatcher.run(scenario)
+        cached = self.cache.get(scenario)
+        if cached:
+            return cached
+
+        result = self.dispatcher.run(scenario)
+        self.cache.set(scenario, result)
+        return result
 
     # -------------------------------
     # SAFETY INTELLIGENCE REPORT
@@ -35,18 +43,24 @@ class AviationSafetySystem:
         """
         Converts historical logs into intelligence output.
         """
-        return self.dashboard.generate_report()
+        return self.dashboard.get_summary()
 
     # -------------------------------
     # FUTURE EXPANSION HOOK
     # -------------------------------
     def simulate_scenarios(self, scenarios: list):
         """
-        Batch risk simulation (future ML training dataset).
+        Batch risk simulation with caching.
         """
         results = []
 
         for s in scenarios:
-            results.append(self.dispatcher.run(s))
+            cached = self.cache.get(s)
+            if cached:
+                results.append(cached)
+            else:
+                result = self.dispatcher.run(s)
+                self.cache.set(s, result)
+                results.append(result)
 
         return results
