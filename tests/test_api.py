@@ -83,5 +83,5 @@ class TestAPI:
         })
         assert response.status_code == 200
         data = response.json()
-        assert data["total_scenarios"] == 2
+        assert data["total_requested"] == 2
         assert len(data["results"]) == 2

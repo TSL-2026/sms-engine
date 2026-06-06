@@ -55,12 +55,24 @@ class SafetyDashboard:
     
     def get_summary(self) -> Dict[str, Any]:
         """Get summary statistics"""
+        total = self.metrics.get("total_assessments", len(self.assessments))
         return {
-            'metrics': self.metrics,
-            'recent_alerts': self.alerts[-5:] if self.alerts else [],
-            'last_assessment': self.assessments[-1] if self.assessments else None,
-            'total_alerts': len(self.alerts)
+            "total_assessments": total,
+            "avg_risk_score": self._calculate_avg_risk(),
+            "metrics": self.metrics,
+            "recent_alerts": self.alerts[-5:] if self.alerts else [],
+            "last_assessment": self.assessments[-1] if self.assessments else None,
+            "total_alerts": len(self.alerts)
         }
+
+    def _calculate_avg_risk(self) -> float:
+        if not self.assessments:
+            return 0.0
+        scores = [
+            a.get("risk", {}).get("risk_score", 0)
+            for a in self.assessments
+        ]
+        return round(sum(scores) / len(scores), 2)
     
     def get_alerts(self) -> List[Dict]:
         """Get all active alerts"""

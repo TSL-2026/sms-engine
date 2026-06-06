@@ -68,9 +68,12 @@ def assess_flight(request: FlightScenario):
     }
 
 
-@app.get("/safety-report")
+@app.get("/safety-report", tags=["analytics"])
 def safety_report():
-    return system.generate_safety_report()
+    stats = system.generate_safety_report()
+    if stats.get("total_assessments") is None:
+        stats["total_assessments"] = 0
+    return stats
 
 
 @app.get("/history")
