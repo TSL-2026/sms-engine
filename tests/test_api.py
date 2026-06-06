@@ -6,14 +6,12 @@ client = TestClient(app)
 
 
 class TestAPI:
-    def test_health(self):
+    def test_landing_page(self):
         response = client.get("/")
         assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "online"
-        assert data["version"] == "2.1.0"
+        assert "Aviation Safety Intelligence" in response.text
 
-    def test_health_alias(self):
+    def test_health(self):
         for ep in ["/health", "/ping"]:
             r = client.get(ep)
             assert r.status_code == 200
