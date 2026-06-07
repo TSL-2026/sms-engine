@@ -4,17 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sms-engine"
-version = "2.2.0"
-description = "Aviation Safety Management System — ICAO-aligned risk assessment engine"
+version = "3.0.0"
+description = "AviaSafe — Multi-tenant Safety Management System aligned with ICAO Annex 19 / Doc 9859"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi==0.136.1",
     "uvicorn==0.47.0",
-    "requests==2.34.2",
     "pydantic==2.13.4",
     "python-dotenv==1.0.0",
+    "google-cloud-firestore>=2.15.0",
     "google-cloud-logging==3.11.0",
-    "google-cloud-storage==2.19.0",
 ]
 
 [project.optional-dependencies]
@@ -30,7 +29,7 @@ gcp = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["aviation*"]
+include = ["sms_engine*"]
 namespaces = false
 
 [tool.ruff]
@@ -41,5 +40,7 @@ line-length = 100
 select = ["E", "F", "I", "W"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["sms_tests"]
 python_files = ["test_*.py"]
+
+

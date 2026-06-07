@@ -13,5 +13,5 @@ services:
       - PYTHONPATH=/app
       - PORT=8080
     volumes:
-      - ./aviation_logs:/app/aviation_logs
+      - ./sms_db:/app/sms_db
     restart: unless-stopped

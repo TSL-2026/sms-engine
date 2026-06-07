@@ -4,32 +4,25 @@ install:
 	pip install -r requirements.txt
 
 dev:
-	PYTHONPATH=$(PWD) uvicorn aviation.api.main:app --reload --host 0.0.0.0 --port 8000
+	PYTHONPATH=$(PWD) uvicorn sms_engine.main:app --reload --host 0.0.0.0 --port 8000
 
 dev-live:
-	PYTHONPATH=$(PWD) uvicorn aviation.api.main:app --reload --host 0.0.0.0 --port 8000 --log-level info
+	PYTHONPATH=$(PWD) uvicorn sms_engine.main:app --reload --host 0.0.0.0 --port 8000 --log-level info
 
 prod:
-	PYTHONPATH=$(PWD) uvicorn aviation.api.main:app --host 0.0.0.0 --port 8000 --workers 4 --log-level warning
-
-test:
-	PYTHONPATH=$(PWD) python -m pytest tests/ -v
-
-test-coverage:
-	PYTHONPATH=$(PWD) python -m pytest tests/ -v --cov=aviation --cov-report=term-missing
+	PYTHONPATH=$(PWD) uvicorn sms_engine.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level warning
 
 lint:
-	ruff check aviation/ tests/
+	ruff check sms_engine/
 
 docker-build:
 	docker build -t sms-engine:latest .
 
 docker-run:
 	docker run -p 8000:8080 \
-		-e OPENROUTER_API_KEY=${OPENROUTER_API_KEY} \
-		-v $(PWD)/aviation_logs:/app/aviation_logs \
+		-v $(PWD)/sms_db:/app/sms_db \
 		sms-engine:latest
 
 clean:
-	rm -rf __pycache__ .pytest_cache
+	rm -rf __pycache__ .pytest_cache sms_db
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

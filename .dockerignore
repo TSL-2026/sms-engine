@@ -6,13 +6,13 @@ __pycache__/
 .gitignore
 .DS_Store
 aviation_logs/
+sms_db/
 bash_events/
 conversations/
 tests/
 scripts/
 *.md
 *.pdf
-*.py
 get-pip.py
 docker-compose.yml
 Makefile
