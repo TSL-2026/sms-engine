@@ -46,7 +46,10 @@ class BatchScenario(BaseModel):
 async def landing_page():
     landing_path = frontend_dir / "landing.html"
     if landing_path.exists():
-        return HTMLResponse(content=landing_path.read_text())
+        html = landing_path.read_text()
+        public_url = os.getenv("PUBLIC_API_URL", "https://sms-engine-660696925387.us-central1.run.app")
+        html = html.replace("PUBLIC_API_URL_PLACEHOLDER", public_url)
+        return HTMLResponse(content=html)
     return {
         "status": "online",
         "system": "Aviation Safety Intelligence System",

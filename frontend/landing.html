@@ -240,13 +240,14 @@
     </div>
 
     <script>
+        const API_URL = 'PUBLIC_API_URL_PLACEHOLDER';
+
         async function loadStats() {
             try {
-                const response = await fetch('/safety-report');
+                const response = await fetch(`${API_URL}/stats`);
                 if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('stat-assessments').textContent = data.total_assessments || 0;
-                    document.getElementById('stat-avgrisk').textContent = (data.avg_risk_score || 0).toFixed(1) + '/25';
+                    document.getElementById('stat-assessments').textContent = 'Live';
+                    document.getElementById('stat-avgrisk').textContent = 'Active';
                 } else {
                     document.getElementById('stat-assessments').textContent = 'Ready';
                     document.getElementById('stat-avgrisk').textContent = 'Active';
@@ -271,7 +272,7 @@
             resultDiv.innerHTML = '<div style="text-align:center;">Analyzing flight scenario...</div>';
 
             try {
-                const response = await fetch('/public/assess-flight', {
+                const response = await fetch(`${API_URL}/assess-flight`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ scenario })
@@ -297,8 +298,8 @@
             } catch (error) {
                 resultDiv.innerHTML = `
                     <div style="text-align:center;color:#ff4444;">
-                        <strong>⚠️ Authentication Required</strong><br><br>
-                        Please <a href="/dashboard/" style="color:#00ff88;">sign in to the dashboard</a> to run live assessments.<br><br>
+                        <strong>⚠️ Service Unavailable</strong><br><br>
+                        The demo service is temporarily unavailable. Please try again later.<br><br>
                         <small>${error.message}</small>
                     </div>`;
             } finally {
