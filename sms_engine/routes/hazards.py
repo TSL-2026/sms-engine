@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+import csv
+import io
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from datetime import datetime, timezone
 from sms_engine.models import Hazard, RiskAssessment
 from sms_engine.database import hazards as hazards_db, risk_assessments as risk_db
@@ -58,3 +60,37 @@ def assess_hazard_risk(tenant_id: str, hazard_id: str, assessment: RiskAssessmen
     assessment.risk_zone = result["risk_zone"]
     doc_id = risk_db.add(assessment.model_dump())
     return {"id": doc_id, **result}
+
+
+@router.post("/operator/{tenant_id}/hazards/import")
+async def import_hazards_csv(tenant_id: str, file: UploadFile = File(...),
+                             user: CurrentUser = Depends(get_current_user)):
+    if not user.can_access_tenant(tenant_id):
+        raise HTTPException(403, "Access denied")
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(400, "Only CSV files accepted")
+    content = await file.read()
+    text = content.decode("utf-8-sig")
+    reader = csv.DictReader(io.StringIO(text))
+    imported = 0
+    errors = []
+    existing = len(hazards_db.list({"tenant_id": tenant_id}))
+    year = datetime.now(timezone.utc).strftime("%Y")
+    for i, row in enumerate(reader, start=2):
+        try:
+            existing += 1
+            hazard_id = f"HR-{year}-{existing:04d}"
+            hazard = Hazard(
+                tenant_id=tenant_id,
+                hazard_id=hazard_id,
+                title=row.get("title", "Imported hazard"),
+                description=row.get("description", ""),
+                category=row.get("category", ""),
+                status=row.get("status", "open"),
+                created_by=user.user_id,
+            )
+            hazards_db.add(hazard.model_dump())
+            imported += 1
+        except Exception as e:
+            errors.append({"row": i, "error": str(e)})
+    return {"imported": imported, "errors": errors, "total_rows": imported + len(errors)}

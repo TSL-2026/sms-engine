@@ -86,6 +86,7 @@
     <button class="tab" onclick="switchTab('hazards')" id="tab-hazards">Hazard Register</button>
     <button class="tab" onclick="switchTab('cans')" id="tab-cans">Corrective Actions</button>
     <button class="tab" onclick="switchTab('matrix')" id="tab-matrix">Risk Matrix</button>
+    <button class="tab" onclick="switchTab('import')" id="tab-import">Import CSV</button>
   </div>
 
   <div id="view-reports" class="tab-content">
@@ -114,6 +115,27 @@
       <div class="card"><div class="num" id="overdue-cans">--</div><div class="label">Overdue</div></div>
     </div>
     <div class="table-wrap"><table><thead><tr><th>CAN ID</th><th>Department</th><th>Priority</th><th>Due Date</th><th>Status</th><th>Hazard</th></tr></thead><tbody id="cans-table"></tbody></table></div>
+  </div>
+
+  <div id="view-import" class="tab-content" style="display:none;">
+    <h3 class="section-title">Import Historical Data (CSV)</h3>
+    <p style="font-size:14px;color:#64748b;margin-bottom:24px;">Upload CSV files to bulk-import legacy reports and hazards. File must be UTF-8 CSV with headers.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div class="card" style="padding:24px;">
+        <h4 style="margin-bottom:16px;">Import Reports (VSR/MOR)</h4>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Expected columns: <code>report_type, occurrence_date, location, description, initial_severity, confidentiality</code></p>
+        <input type="file" id="csv-reports" accept=".csv" style="margin-bottom:12px;font-size:13px;">
+        <button onclick="importCSV('reports')" class="tab active" style="cursor:pointer;">Upload Reports CSV</button>
+        <div id="import-reports-result" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+      <div class="card" style="padding:24px;">
+        <h4 style="margin-bottom:16px;">Import Hazards</h4>
+        <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Expected columns: <code>title, description, category, status</code></p>
+        <input type="file" id="csv-hazards" accept=".csv" style="margin-bottom:12px;font-size:13px;">
+        <button onclick="importCSV('hazards')" class="tab active" style="cursor:pointer;">Upload Hazards CSV</button>
+        <div id="import-hazards-result" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+    </div>
   </div>
 
   <div id="view-matrix" class="tab-content" style="display:none;">
@@ -244,6 +266,30 @@ async function loadMatrix() {
     document.getElementById('matrix-container').innerHTML = html;
   } catch (e) {
     console.error('Matrix error:', e);
+  }
+}
+
+async function importCSV(type) {
+  const input = document.getElementById(`csv-${type}`);
+  const file = input.files[0];
+  if (!file) { alert('Select a CSV file first'); return; }
+  const resultDiv = document.getElementById(`import-${type}-result`);
+  resultDiv.innerHTML = '<span style="color:#f59e0b;">Uploading...</span>';
+  try {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(`${API}/api/v1/operator/${currentTenant}/${type}/import`, {
+      method: 'POST', headers: { 'X-API-Key': apiKey }, body: form
+    });
+    const data = await res.json();
+    if (data.errors && data.errors.length > 0) {
+      resultDiv.innerHTML = `<span style="color:#22c55e;">${data.imported} imported</span> · <span style="color:#ef4444;">${data.errors.length} errors</span><br><small style="color:#64748b;">${data.errors.slice(0,3).map(e => `Row ${e.row}: ${e.error}`).join('<br>')}</small>`;
+    } else {
+      resultDiv.innerHTML = `<span style="color:#22c55e;">✅ ${data.imported} records imported successfully</span>`;
+    }
+    loadAll();
+  } catch(e) {
+    resultDiv.innerHTML = `<span style="color:#ef4444;">Import failed: ${e.message}</span>`;
   }
 }
 
