@@ -6,6 +6,7 @@
 <title>AviaSafe SMS — Safety Management System</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>✈</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --primary-dark: #0a2540;
@@ -149,16 +150,39 @@
     background: var(--bg-light); padding: 4px 12px; border-radius: 12px;
     font-size: 12px; color: var(--text-light); border: 1px solid var(--border-light);
   }
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+  .chart-card { background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; padding: 20px; }
+  .chart-card h4 { font-size: 14px; color: var(--text-light); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .chart-card .sub { font-size: 11px; color: var(--text-light); margin-bottom: 12px; }
+  .chart-card .chart-wrap { position: relative; height: 220px; }
+  .chart-skeleton { background: linear-gradient(90deg, var(--bg-light) 25%, #e8e8e8 50%, var(--bg-light) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; height: 220px; }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .demo-badge { display: inline-block; background: #fff8e1; border: 1px solid #ffc107; color: #856404; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; margin: 0 16px; font-size: 13px; color: var(--text-light); }
+  .toggle-switch { position: relative; width: 40px; height: 22px; background: #ccc; border-radius: 11px; cursor: pointer; transition: background 0.2s; }
+  .toggle-switch.active { background: var(--primary-blue); }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: transform 0.2s; }
+  .toggle-switch.active::after { transform: translateX(18px); }
   @media (max-width: 768px) {
+    .chart-grid { grid-template-columns: 1fr; }
     .matrix-row { grid-template-columns: 60px repeat(5, 1fr); }
     .matrix-cell { font-size: 10px; padding: 4px; }
     .sidebar { width: 100%; min-height: auto; }
     div[style*="display: flex;"] { flex-direction: column; }
+    .chart-card .chart-wrap { height: 200px; }
   }
 </style>
 </head>
 <body>
 <div id="debug-bar" style="display:none;background:#fff8e1;border-bottom:2px solid #ffc107;padding:6px 16px;font-size:13px;font-family:monospace;"></div>
+<div style="display:flex;align-items:center;background:var(--primary-dark);padding:4px 16px;">
+  <span style="color:#8898aa;font-size:12px;">AviaSafe SMS</span>
+  <span style="flex:1;"></span>
+  <span class="toggle-wrap">
+    <span>Demo Mode</span>
+    <span class="toggle-switch" id="demo-toggle" onclick="toggleDemo()"></span>
+  </span>
+</div>
 <div style="display: flex;">
   <div class="sidebar">
     <div style="margin-bottom: 2rem;">
@@ -197,6 +221,29 @@
     <button class="tab" onclick="switchTab('cans')" id="tab-cans">Corrective Actions</button>
     <button class="tab" onclick="switchTab('matrix')" id="tab-matrix">Risk Matrix</button>
     <button class="tab" onclick="switchTab('import')" id="tab-import">Import CSV</button>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h4>Leading Indicators</h4>
+      <div class="sub">Hazard trends by category (last 90 days) &middot; ICAO Doc 10159</div>
+      <div class="chart-wrap"><canvas id="chart-leading"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h4>Risk Distribution</h4>
+      <div class="sub">Intolerable vs Tolerable vs Acceptable &middot; ICAO Doc 9859</div>
+      <div class="chart-wrap"><canvas id="chart-risk"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h4>Lagging Indicators</h4>
+      <div class="sub">Open hazard aging (0-30, 31-60, 61-90, 90+ days) &middot; ICAO Doc 10159</div>
+      <div class="chart-wrap"><canvas id="chart-lagging"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h4>CAN Status</h4>
+      <div class="sub">Corrective Action Notice lifecycle breakdown</div>
+      <div class="chart-wrap"><canvas id="chart-cans"></canvas></div>
+    </div>
   </div>
 
   <div id="view-reports" class="tab-content">
@@ -374,6 +421,24 @@ async function loadAll() {
       setText('pending-reports', pr);
       setText('total-hazards', data.tenants.reduce((s, t) => s + (t.open_hazard_count || 0), 0));
       setText('open-hazards', data.tenants.filter(t => (t.open_hazard_count || 0) > 0).length);
+
+      const agg = await api('/api/v1/regulator/hazards/aggregated?limit=200');
+      const leads = await api('/api/v1/regulator/hazards/leading-indicators');
+      const lags = await api('/api/v1/regulator/hazards/lagging-indicators');
+
+      if (demoMode) {
+        renderLeadingChart(DEMO_HAZARDS);
+        renderRiskChart(DEMO_HAZARDS, DEMO_ASSESSMENTS);
+        renderLaggingChart(DEMO_HAZARDS);
+        renderCansChart(DEMO_CANS);
+      } else {
+        renderLeadingChart(agg);
+        const catDist = leads.category_distribution_all || {};
+        const mockAssess = agg.map(h => ({ hazard_id: h.id, risk_zone: h.risk_zone || 'acceptable' }));
+        renderRiskChart(agg, mockAssess);
+        renderLaggingChart(agg);
+        renderCansChart(data.tenants.flatMap(t => Array(t.open_can_count || 0).fill({ status: 'Issued' })));
+      }
     } catch (e) {
       console.error('Regulator dashboard error:', e);
       setText('total-reports', 'ERR');
@@ -436,6 +501,7 @@ async function loadAll() {
     console.error('CANs error:', e);
     setTable('cans-table', `<tr><td colspan="6" style="color:red;padding:1rem;">Error loading CANs: ${e.message}</td></tr>`);
   }
+  renderCharts();
   updateDebug();
 }
 
@@ -484,6 +550,289 @@ async function loadMatrix() {
   } catch (e) {
     console.error('Matrix error:', e);
   }
+}
+
+// -- Chart state --
+let chartLeading = null, chartRisk = null, chartLagging = null, chartCans = null;
+let demoMode = false;
+
+function toggleDemo() {
+  demoMode = !demoMode;
+  document.getElementById('demo-toggle').classList.toggle('active', demoMode);
+  renderCharts();
+}
+
+function daysSince(d) {
+  if (!d) return 999;
+  const ms = Date.now() - new Date(d).getTime();
+  return Math.floor(ms / 86400000);
+}
+
+function getCategoryCounts(hazards) {
+  const counts = {};
+  const now = Date.now();
+  const cutoff = now - 90 * 86400000;
+  hazards.forEach(h => {
+    const cat = (h.category || 'Uncategorized').trim();
+    if (!cat) return;
+    const created = h.created_at ? new Date(h.created_at).getTime() : 0;
+    if (created >= cutoff) counts[cat] = (counts[cat] || 0) + 1;
+  });
+  return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+}
+
+function getRiskDistribution(hazards, assessments) {
+  const assoc = {};
+  (assessments || []).forEach(a => { assoc[a.hazard_id] = a.risk_zone; });
+  const zones = { intolerable: 0, tolerable: 0, acceptable: 0 };
+  hazards.forEach(h => {
+    const zone = assoc[h.id] || 'acceptable';
+    if (zone in zones) zones[zone]++; else zones.acceptable++;
+  });
+  return zones;
+}
+
+function getAgingBuckets(hazards) {
+  const b = { '0-30 days': 0, '31-60 days': 0, '61-90 days': 0, '90+ days': 0 };
+  hazards.filter(h => h.status !== 'closed' && h.status !== 'Closed').forEach(h => {
+    const d = daysSince(h.created_at);
+    if (d <= 30) b['0-30 days']++;
+    else if (d <= 60) b['31-60 days']++;
+    else if (d <= 90) b['61-90 days']++;
+    else b['90+ days']++;
+  });
+  return Object.entries(b);
+}
+
+function getCanStatusCounts(cans) {
+  const counts = { Draft: 0, Issued: 0, Accepted: 0, Rejected: 0, Expired: 0, Other: 0 };
+  (cans || []).forEach(c => {
+    const s = c.status || 'Other';
+    if (s in counts) counts[s]++; else counts.Other++;
+  });
+  return Object.entries(counts).filter(([, v]) => v > 0);
+}
+
+const DEMO_HAZARDS = [
+  { category: 'Technical', created_at: new Date(Date.now() - 5*86400000).toISOString(), status: 'open', id: 'd1', risk_zone: 'tolerable' },
+  { category: 'Operational', created_at: new Date(Date.now() - 12*86400000).toISOString(), status: 'open', id: 'd2', risk_zone: 'intolerable' },
+  { category: 'Technical', created_at: new Date(Date.now() - 20*86400000).toISOString(), status: 'open', id: 'd3', risk_zone: 'tolerable' },
+  { category: 'Organizational', created_at: new Date(Date.now() - 35*86400000).toISOString(), status: 'open', id: 'd4', risk_zone: 'acceptable' },
+  { category: 'Environmental', created_at: new Date(Date.now() - 40*86400000).toISOString(), status: 'open', id: 'd5', risk_zone: 'tolerable' },
+  { category: 'Operational', created_at: new Date(Date.now() - 55*86400000).toISOString(), status: 'open', id: 'd6', risk_zone: 'intolerable' },
+  { category: 'Technical', created_at: new Date(Date.now() - 70*86400000).toISOString(), status: 'open', id: 'd7', risk_zone: 'acceptable' },
+  { category: 'Human Factors', created_at: new Date(Date.now() - 80*86400000).toISOString(), status: 'open', id: 'd8', risk_zone: 'tolerable' },
+  { category: 'Environmental', created_at: new Date(Date.now() - 85*86400000).toISOString(), status: 'closed', id: 'd9', risk_zone: 'tolerable' },
+  { category: 'Operational', created_at: new Date(Date.now() - 3*86400000).toISOString(), status: 'open', id: 'd10', risk_zone: 'intolerable' },
+  { category: 'Technical', created_at: new Date(Date.now() - 15*86400000).toISOString(), status: 'open', id: 'd11', risk_zone: 'tolerable' },
+  { category: 'Organizational', created_at: new Date(Date.now() - 45*86400000).toISOString(), status: 'open', id: 'd12', risk_zone: 'acceptable' },
+  { category: 'Human Factors', created_at: new Date(Date.now() - 60*86400000).toISOString(), status: 'open', id: 'd13', risk_zone: 'tolerable' },
+  { category: 'Operational', created_at: new Date(Date.now() - 95*86400000).toISOString(), status: 'open', id: 'd14', risk_zone: 'intolerable' },
+  { category: 'Technical', created_at: new Date(Date.now() - 110*86400000).toISOString(), status: 'open', id: 'd15', risk_zone: 'tolerable' },
+];
+
+const DEMO_CANS = [
+  { status: 'Draft' }, { status: 'Draft' }, { status: 'Issued' }, { status: 'Issued' },
+  { status: 'Issued' }, { status: 'Accepted' }, { status: 'Accepted' }, { status: 'Accepted' },
+  { status: 'Accepted' }, { status: 'Rejected' }, { status: 'Expired' },
+];
+
+const DEMO_ASSESSMENTS = [
+  { hazard_id: 'd1', risk_zone: 'tolerable' }, { hazard_id: 'd2', risk_zone: 'intolerable' },
+  { hazard_id: 'd3', risk_zone: 'tolerable' }, { hazard_id: 'd4', risk_zone: 'acceptable' },
+  { hazard_id: 'd5', risk_zone: 'tolerable' }, { hazard_id: 'd6', risk_zone: 'intolerable' },
+  { hazard_id: 'd7', risk_zone: 'acceptable' }, { hazard_id: 'd8', risk_zone: 'tolerable' },
+  { hazard_id: 'd9', risk_zone: 'tolerable' }, { hazard_id: 'd10', risk_zone: 'intolerable' },
+  { hazard_id: 'd11', risk_zone: 'tolerable' }, { hazard_id: 'd12', risk_zone: 'acceptable' },
+  { hazard_id: 'd13', risk_zone: 'tolerable' }, { hazard_id: 'd14', risk_zone: 'intolerable' },
+  { hazard_id: 'd15', risk_zone: 'tolerable' },
+];
+
+async function renderCharts() {
+  if (demoMode) {
+    renderLeadingChart(DEMO_HAZARDS);
+    renderRiskChart(DEMO_HAZARDS, DEMO_ASSESSMENTS);
+    renderLaggingChart(DEMO_HAZARDS);
+    renderCansChart(DEMO_CANS);
+    return;
+  }
+  try {
+    const hazards = await api(`/api/v1/operator/${currentTenant}/hazards`);
+    const cans = await api(`/api/v1/operator/${currentTenant}/cans`);
+    let assessments = [];
+    try {
+      const details = await Promise.all(hazards.slice(0, 20).map(h =>
+        api(`/api/v1/operator/${currentTenant}/hazards/${h.id}`).catch(() => null)
+      ));
+      assessments = details.filter(Boolean).flatMap(d => d.risk_assessments || []);
+    } catch (e) { console.warn('Assessments partial:', e.message); }
+    renderLeadingChart(hazards);
+    renderRiskChart(hazards, assessments);
+    renderLaggingChart(hazards);
+    renderCansChart(cans);
+  } catch (e) {
+    console.error('Chart load error:', e);
+    renderLeadingChart(DEMO_HAZARDS);
+    renderRiskChart(DEMO_HAZARDS, DEMO_ASSESSMENTS);
+    renderLaggingChart(DEMO_HAZARDS);
+    renderCansChart(DEMO_CANS);
+  }
+}
+
+function renderLeadingChart(hazards) {
+  const data = getCategoryCounts(hazards);
+  const labels = data.map(d => d[0]), values = data.map(d => d[1]);
+  const ctx = document.getElementById('chart-leading').getContext('2d');
+  if (chartLeading) { chartLeading.destroy(); }
+  chartLeading = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Hazards (90 days)',
+        data: values,
+        backgroundColor: values.map(v => {
+          const i = Math.min(v / Math.max(...values, 1), 1);
+          const r = Math.round(0 + i * 70);
+          const g = Math.round(85 + i * 0);
+          const b = Math.round(164 + i * (200 - 164));
+          return `rgba(${r}, ${g}, ${b}, 0.8)`;
+        }),
+        borderColor: '#0055a4',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: '#f0f0f0' } },
+        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderRiskChart(hazards, assessments) {
+  const zones = getRiskDistribution(hazards, assessments);
+  const total = zones.intolerable + zones.tolerable + zones.acceptable;
+  const ctx = document.getElementById('chart-risk').getContext('2d');
+  if (chartRisk) { chartRisk.destroy(); }
+  chartRisk = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Intolerable', 'Tolerable', 'Acceptable'],
+      datasets: [{
+        data: [zones.intolerable, zones.tolerable, zones.acceptable],
+        backgroundColor: ['#dc3545', '#ffc107', '#00a86b'],
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } }
+      }
+    },
+    plugins: [{
+      id: 'centerText',
+      beforeDraw: function(chart) {
+        const { width, height, ctx } = chart;
+        ctx.save();
+        const cx = width / 2, cy = height / 2 - 8;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold ${Math.min(width, height) * 0.1}px Inter, sans-serif`;
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillText(total, cx, cy);
+        ctx.font = `${Math.min(width, height) * 0.04}px Inter, sans-serif`;
+        ctx.fillStyle = '#666';
+        ctx.fillText('Total', cx, cy + Math.min(width, height) * 0.07);
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function renderLaggingChart(hazards) {
+  const buckets = getAgingBuckets(hazards);
+  const labels = buckets.map(b => b[0]), values = buckets.map(b => b[1]);
+  const ctx = document.getElementById('chart-lagging').getContext('2d');
+  if (chartLagging) { chartLagging.destroy(); }
+  const colors = ['#17a2b8', '#ffc107', '#fd7e14', '#dc3545'];
+  chartLagging = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Open Hazards',
+        data: values,
+        backgroundColor: colors.map(c => c + 'cc'),
+        borderColor: colors,
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { size: 10 } }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: '#f0f0f0' } }
+      }
+    }
+  });
+}
+
+function renderCansChart(cans) {
+  const data = getCanStatusCounts(cans);
+  const labels = data.map(d => d[0]), values = data.map(d => d[1]);
+  const colorMap = { Draft: '#adb5bd', Issued: '#0055a4', Accepted: '#00a86b', Rejected: '#dc3545', Expired: '#6c757d', Other: '#999' };
+  const colors = labels.map(l => colorMap[l] || '#999');
+  const ctx = document.getElementById('chart-cans').getContext('2d');
+  if (chartCans) { chartCans.destroy(); }
+  chartCans = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'CANs',
+        data: values,
+        backgroundColor: colors.map(c => c + 'cc'),
+        borderColor: colors,
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const total = values.reduce((a, b) => a + b, 0);
+              const pct = total ? Math.round(ctx.raw / total * 100) : 0;
+              return `${ctx.raw} (${pct}%)`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: '#f0f0f0' } },
+        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
 }
 
 async function importCSV(type) {
@@ -645,6 +994,15 @@ document.querySelectorAll('#reports-table, #hazards-table, #cans-table').forEach
 
 loadAll();
 loadMatrix();
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    [chartLeading, chartRisk, chartLagging, chartCans].forEach(c => { if (c) c.resize(); });
+  }, 200);
+});
+
 setInterval(() => {
   if (sessionStorage.getItem('sms_tenant')) loadAll();
 }, 30000);
