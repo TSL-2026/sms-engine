@@ -1,4 +1,6 @@
+from pathlib import Path
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from sms_engine.frontend import mount_frontend
 from sms_engine.routes import reports, hazards, cans, regulator, tenants
 
@@ -20,21 +22,14 @@ def health():
     return {"status": "ok", "system": "AviaSafe SMS", "version": "3.0.0"}
 
 
-@app.get("/")
+LANDING = Path(__file__).resolve().parent.parent / "frontend_sms" / "landing.html"
+
+
+@app.get("/", response_class=HTMLResponse)
 def root():
-    return {
-        "system": "AviaSafe SMS",
-        "version": "3.0.0",
-        "docs": "/docs",
-        "endpoints": {
-            "reports": "POST/GET /api/v1/operator/{tenant_id}/reports",
-            "hazards": "POST/GET /api/v1/operator/{tenant_id}/hazards",
-            "risk_assessment": "POST /api/v1/operator/{tenant_id}/hazards/{id}/risk",
-            "cans": "POST/GET /api/v1/operator/{tenant_id}/cans",
-            "cap": "POST /api/v1/operator/{tenant_id}/cans/{id}/cap",
-            "regulator_dashboard": "GET /api/v1/regulator/dashboard",
-        },
-    }
+    if LANDING.exists():
+        return HTMLResponse(content=LANDING.read_text())
+    return {"system": "AviaSafe SMS", "version": "3.0.0"}
 
 
 mount_frontend(app)
