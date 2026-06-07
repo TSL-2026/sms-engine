@@ -4,40 +4,54 @@
     <title>SMS-Engine Dashboard</title>
     <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
+        :root {
+            --primary-dark: #0a2540;
+            --primary-blue: #0055a4;
+            --primary-light: #eef4ff;
+            --primary-teal: #00a86b;
+            --text-dark: #1a1a1a;
+            --text-light: #666666;
+            --border-light: #e0e0e0;
+            --bg-light: #f8f9fa;
+            --accent-warning: #ffc107;
+            --accent-error: #dc3545;
+            --accent-info: #17a2b8;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; background: #0f1235; color: #e0e0e0; }
-        .nav { background: #1a1f4a; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a2f5a; }
-        .nav h1 { margin: 0; font-size: 20px; color: #00ff88; }
+        body { font-family: var(--font-family); margin: 0; background: var(--primary-dark); color: #e0e0e0; }
+        .nav { background: #0d1b30; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1a3350; }
+        .nav h1 { margin: 0; font-size: 20px; color: var(--primary-teal); }
         .container { max-width: 1000px; margin: 24px auto; padding: 0 24px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat { background: #1a1f4a; padding: 20px; border-radius: 10px; border: 1px solid #2a2f5a; }
+        .stat { background: #0d1b30; padding: 20px; border-radius: 10px; border: 1px solid #1a3350; }
         .stat .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .stat .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
-        .stat .value.green { color: #00ff88; }
-        .stat .value.red { color: #ff4444; }
-        .stat .value.yellow { color: #ffaa00; }
-        .card { background: #1a1f4a; padding: 24px; border-radius: 10px; border: 1px solid #2a2f5a; margin-bottom: 24px; }
+        .stat .value.green { color: var(--primary-teal); }
+        .stat .value.red { color: var(--accent-error); }
+        .stat .value.yellow { color: var(--accent-warning); }
+        .card { background: #0d1b30; padding: 24px; border-radius: 10px; border: 1px solid #1a3350; margin-bottom: 24px; }
         .card h2 { margin: 0 0 16px; font-size: 16px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-        button { background: #00ff88; padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; color: #000; font-weight: 600; }
-        button:hover { background: #00cc6a; }
-        textarea { width: 100%; padding: 12px; background: #0f1235; color: #e0e0e0; border: 1px solid #2a2f5a; border-radius: 6px; font-family: monospace; font-size: 14px; margin-bottom: 12px; }
-        pre { background: #0f1235; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; border: 1px solid #2a2f5a; }
+        button { background: var(--primary-teal); padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; }
+        button:hover { background: #008a56; }
+        textarea { width: 100%; padding: 12px; background: var(--primary-dark); color: #e0e0e0; border: 1px solid #1a3350; border-radius: 6px; font-family: monospace; font-size: 14px; margin-bottom: 12px; }
+        pre { background: var(--primary-dark); padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; border: 1px solid #1a3350; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; padding: 8px 12px; color: #888; border-bottom: 1px solid #2a2f5a; font-weight: 500; }
-        td { padding: 8px 12px; border-bottom: 1px solid #1a1f4a; }
+        th { text-align: left; padding: 8px 12px; color: #888; border-bottom: 1px solid #1a3350; font-weight: 500; }
+        td { padding: 8px 12px; border-bottom: 1px solid #0d1b30; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-        .badge.go { background: #003d20; color: #00ff88; }
-        .badge.no-go { background: #3d0000; color: #ff4444; }
-        .badge.conditional { background: #3d2a00; color: #ffaa00; }
+        .badge.go { background: #003d20; color: var(--primary-teal); }
+        .badge.no-go { background: #3d0000; color: var(--accent-error); }
+        .badge.conditional { background: #3d2a00; color: var(--accent-warning); }
         .badge.error { background: #3d0000; color: #ff6666; }
         .loading { text-align: center; padding: 40px; color: #888; }
         .auth-info { font-size: 13px; color: #888; }
         #user-status { font-size: 13px; }
         .btn-group { display: flex; gap: 8px; }
-        .btn-outline { background: transparent; border: 1px solid #2a2f5a; color: #e0e0e0; }
-        .btn-outline:hover { background: #2a2f5a; }
-        .inline-btn { background: #2a2f5a; padding: 4px 12px; border: none; border-radius: 4px; cursor: pointer; color: #e0e0e0; font-size: 12px; }
-        .inline-btn:hover { background: #3a3f6a; }
+        .btn-outline { background: transparent; border: 1px solid #1a3350; color: #e0e0e0; }
+        .btn-outline:hover { background: #1a3350; }
+        .inline-btn { background: #1a3350; padding: 4px 12px; border: none; border-radius: 4px; cursor: pointer; color: #e0e0e0; font-size: 12px; }
+        .inline-btn:hover { background: #2a4a70; }
     </style>
 </head>
 <body>
@@ -182,5 +196,14 @@
             }, 1000);
         }
     </script>
+<footer style="background: var(--primary-dark); color: white; padding: 2rem; text-align: center; margin-top: 3rem;">
+    <div class="footer-content">
+        <div class="footer-links" style="margin-bottom: 1rem;">
+            <a href="/docs" style="color: white; margin: 0 1rem; text-decoration: none;">API Docs</a>
+            <a href="/dashboard/" target="_blank" style="color: white; margin: 0 1rem; text-decoration: none;">Dashboard</a>
+        </div>
+        <p style="margin: 1rem 0 0; font-size: 0.9rem;">&copy; 2026 A project by Ghanshyam Acharya. All rights reserved.</p>
+    </div>
+</footer>
 </body>
 </html>

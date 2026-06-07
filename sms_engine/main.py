@@ -28,7 +28,7 @@ LANDING = Path(__file__).resolve().parent.parent / "frontend_sms" / "landing.htm
 @app.get("/", response_class=HTMLResponse)
 def root():
     if LANDING.exists():
-        return HTMLResponse(content=LANDING.read_text())
+        return HTMLResponse(content=LANDING.read_text(encoding="utf-8"))
     return {"system": "AviaSafe SMS", "version": "3.0.0"}
 
 

@@ -10,6 +10,14 @@ from sms_engine.database import users as users_db
 AUTHORIZED_API_KEYS = {
     "dev-key-regulator": {"tenant_id": "*", "role": "regulator", "user_id": "dev-regulator"},
     "dev-key-operator": {"tenant_id": "tenant-001", "role": "safety_manager", "user_id": "dev-safety"},
+    "sita-air-key-2026": {"tenant_id": "sita-air", "role": "safety_manager", "user_id": "sita-safety"},
+    "caan-reg-key-2026": {"tenant_id": "caan", "role": "regulator", "user_id": "caan-regulator"},
+    "buddha-air-key-2026": {"tenant_id": "buddha-air", "role": "safety_manager", "user_id": "buddha-safety"},
+    "yeti-airlines-key-2026": {"tenant_id": "yeti-airlines", "role": "safety_manager", "user_id": "yeti-safety"},
+    "shree-airlines-key-2026": {"tenant_id": "shree-airlines", "role": "safety_manager", "user_id": "shree-safety"},
+    "nepal-airlines-key-2026": {"tenant_id": "nepal-airlines", "role": "safety_manager", "user_id": "nac-safety"},
+    "saurya-airlines-key-2026": {"tenant_id": "saurya-airlines", "role": "safety_manager", "user_id": "saurya-safety"},
+    "summit-air-key-2026": {"tenant_id": "summit-air", "role": "safety_manager", "user_id": "summit-safety"},
 }
 
 
@@ -48,3 +56,12 @@ async def get_current_user(request: Request) -> CurrentUser:
         )
 
     raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+
+async def verify_regulator_key(request: Request) -> str:
+    api_key = request.headers.get("X-API-Key", "")
+    if api_key in AUTHORIZED_API_KEYS:
+        info = AUTHORIZED_API_KEYS[api_key]
+        if info["role"] == "regulator":
+            return api_key
+    raise HTTPException(status_code=403, detail="Regulator access required")

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AviaSafe SMS — Sign In</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>✈</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary-dark: #0a2540;
+    --primary-blue: #0055a4;
+    --primary-light: #eef4ff;
+    --primary-teal: #00a86b;
+    --text-dark: #1a1a1a;
+    --text-light: #666666;
+    --border-light: #e0e0e0;
+    --bg-light: #f8f9fa;
+    --accent-warning: #ffc107;
+    --accent-error: #dc3545;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-family);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-light) 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+  }
+  .login-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 440px;
+  }
+  .login-card .logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-card .logo h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--primary-dark);
+  }
+  .login-card .logo h1 span {
+    color: var(--primary-blue);
+  }
+  .login-card .logo p {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+  }
+  .form-group select,
+  .form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: var(--font-family);
+    color: var(--text-dark);
+    background: #fff;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-group select:focus,
+  .form-group input:focus {
+    border-color: var(--primary-blue);
+  }
+  .form-group input::placeholder {
+    color: #aaa;
+  }
+  .form-group .hint {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+  .btn-signin {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary-blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+  }
+  .btn-signin:hover {
+    background: #004080;
+  }
+  .btn-signin:disabled {
+    background: #999;
+    cursor: not-allowed;
+  }
+  .error-msg {
+    color: var(--accent-error);
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
+    display: none;
+  }
+  .error-msg.visible {
+    display: block;
+  }
+  .success-msg {
+    color: var(--primary-teal);
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
+    display: none;
+  }
+  .success-msg.visible {
+    display: block;
+  }
+  .footer-text {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 24px;
+  }
+  .footer-text a {
+    color: var(--primary-blue);
+    text-decoration: none;
+  }
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="login-card">
+  <div class="logo">
+    <h1>AviaSafe <span>SMS</span></h1>
+    <p>ICAO Annex 19 / Doc 9859 Compliant</p>
+  </div>
+
+  <div class="form-group">
+    <label for="tenant-select">Select Operator</label>
+    <select id="tenant-select">
+      <option value="">— Choose your operator —</option>
+      <option value="buddha-air">Buddha Air</option>
+      <option value="yeti-airlines">Yeti Airlines</option>
+      <option value="shree-airlines">Shree Airlines</option>
+      <option value="nepal-airlines">Nepal Airlines</option>
+      <option value="saurya-airlines">Saurya Airlines</option>
+      <option value="summit-air">Summit Air</option>
+      <option value="sita-air">Sita Air</option>
+      <option value="caan">CAAN Regulator (Oversight)</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="api-key-input">API Key</label>
+    <input type="password" id="api-key-input" placeholder="Paste or auto-fill your API key">
+    <div class="hint">Auto-filled based on selection; you can override if needed.</div>
+  </div>
+
+  <button class="btn-signin" id="signin-btn" onclick="signIn()">Sign In</button>
+
+  <div class="error-msg" id="error-msg"></div>
+  <div class="success-msg" id="success-msg"></div>
+
+  <div class="footer-text">
+    <a href="/">&larr; Back to landing page</a>
+  </div>
+</div>
+
+<script>
+const TENANT_KEYS = {
+  'buddha-air': 'buddha-air-key-2026',
+  'yeti-airlines': 'yeti-airlines-key-2026',
+  'shree-airlines': 'shree-airlines-key-2026',
+  'nepal-airlines': 'nepal-airlines-key-2026',
+  'saurya-airlines': 'saurya-airlines-key-2026',
+  'summit-air': 'summit-air-key-2026',
+  'sita-air': 'sita-air-key-2026',
+  'caan': 'caan-reg-key-2026',
+};
+
+document.getElementById('tenant-select').addEventListener('change', function() {
+  const key = TENANT_KEYS[this.value] || '';
+  document.getElementById('api-key-input').value = key;
+  document.getElementById('error-msg').classList.remove('visible');
+  document.getElementById('success-msg').classList.remove('visible');
+});
+
+async function signIn() {
+  const tenant = document.getElementById('tenant-select').value;
+  const apiKey = document.getElementById('api-key-input').value.trim();
+  const btn = document.getElementById('signin-btn');
+  const errorEl = document.getElementById('error-msg');
+  const successEl = document.getElementById('success-msg');
+
+  errorEl.classList.remove('visible');
+  successEl.classList.remove('visible');
+
+  if (!tenant) {
+    errorEl.textContent = 'Please select an operator.';
+    errorEl.classList.add('visible');
+    return;
+  }
+  if (!apiKey) {
+    errorEl.textContent = 'Please enter an API key.';
+    errorEl.classList.add('visible');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Validating...';
+
+  try {
+    const isRegulator = tenant === 'caan';
+    const testUrl = isRegulator
+      ? '/api/v1/regulator/dashboard'
+      : `/api/v1/operator/${tenant}/hazards`;
+
+    const res = await fetch(testUrl, {
+      headers: { 'X-API-Key': apiKey }
+    });
+
+    if (!res.ok) {
+      throw new Error(res.status === 401 || res.status === 403
+        ? 'Invalid API key or insufficient permissions.'
+        : `Server returned ${res.status}.`);
+    }
+
+    sessionStorage.setItem('sms_tenant', tenant);
+    sessionStorage.setItem('sms_apikey', apiKey);
+    sessionStorage.setItem('sms_view', isRegulator ? 'regulator' : 'operator');
+
+    successEl.textContent = 'Authentication successful. Redirecting...';
+    successEl.classList.add('visible');
+
+    setTimeout(() => {
+      window.location.href = '/dashboard/';
+    }, 400);
+  } catch (e) {
+    errorEl.textContent = e.message;
+    errorEl.classList.add('visible');
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In';
+  }
+}
+</script>
+</body>
+</html>

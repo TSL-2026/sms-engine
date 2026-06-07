@@ -12,10 +12,24 @@
     <meta name="twitter:card" content="summary_large_card">
 
     <style>
+        :root {
+            --primary-dark: #0a2540;
+            --primary-blue: #0055a4;
+            --primary-light: #eef4ff;
+            --primary-teal: #00a86b;
+            --text-dark: #1a1a1a;
+            --text-light: #666666;
+            --border-light: #e0e0e0;
+            --bg-light: #f8f9fa;
+            --accent-warning: #ffc107;
+            --accent-error: #dc3545;
+            --accent-info: #17a2b8;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #0d1b30 100%);
             color: #ffffff;
             line-height: 1.6;
             overflow-x: hidden;
@@ -26,7 +40,7 @@
         .bg-animation::before {
             content: '';
             position: absolute; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(0,255,136,0.1) 1px, transparent 1px);
+            background: radial-gradient(circle, rgba(0,168,107,0.1) 1px, transparent 1px);
             background-size: 50px 50px;
             animation: moveBackground 20s linear infinite;
         }
@@ -36,70 +50,70 @@
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .navbar { padding: 20px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-        .logo { font-size: 28px; font-weight: bold; background: linear-gradient(135deg, #00ff88, #00cc6a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .logo { font-size: 28px; font-weight: bold; background: linear-gradient(135deg, var(--primary-teal), #008a56); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .logo span { font-size: 32px; }
         .nav-links { display: flex; gap: 30px; align-items: center; flex-wrap: wrap; }
         .nav-links a { color: #ffffff; text-decoration: none; transition: color 0.3s; }
-        .nav-links a:hover { color: #00ff88; }
+        .nav-links a:hover { color: var(--primary-teal); }
         .btn-glow {
-            background: linear-gradient(135deg, #00ff88, #00cc6a); color: #0a0e27; padding: 10px 24px;
+            background: linear-gradient(135deg, var(--primary-teal), #008a56); color: #ffffff; padding: 10px 24px;
             border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s, box-shadow 0.3s; display: inline-block;
         }
-        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,255,136,0.3); color: #0a0e27; }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,168,107,0.3); color: #ffffff; }
         .btn-outline {
-            border: 2px solid #00ff88; background: transparent; padding: 8px 22px; border-radius: 8px;
-            color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s;
+            border: 2px solid var(--primary-teal); background: transparent; padding: 8px 22px; border-radius: 8px;
+            color: var(--primary-teal); text-decoration: none; font-weight: 600; transition: all 0.3s;
         }
-        .btn-outline:hover { background: rgba(0,255,136,0.1); transform: translateY(-2px); }
+        .btn-outline:hover { background: rgba(0,168,107,0.1); transform: translateY(-2px); }
         .hero { padding: 80px 0 60px; text-align: center; }
         .hero h1 {
             font-size: 56px; font-weight: 800; margin-bottom: 20px;
-            background: linear-gradient(135deg, #ffffff, #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent;
+            background: linear-gradient(135deg, #ffffff, var(--primary-teal)); -webkit-background-clip: text; background-clip: text; color: transparent;
         }
         .hero .subtitle { font-size: 20px; color: #a0a5c0; margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto; }
         .hero-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
         .stats { padding: 60px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
         .stat-card {
-            background: rgba(26,31,58,0.8); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px;
-            text-align: center; border: 1px solid rgba(0,255,136,0.2); transition: transform 0.3s;
+            background: rgba(13,27,48,0.8); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px;
+            text-align: center; border: 1px solid rgba(0,168,107,0.2); transition: transform 0.3s;
         }
-        .stat-card:hover { transform: translateY(-5px); border-color: #00ff88; }
-        .stat-number { font-size: 48px; font-weight: bold; color: #00ff88; margin-bottom: 10px; }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary-teal); }
+        .stat-number { font-size: 48px; font-weight: bold; color: var(--primary-teal); margin-bottom: 10px; }
         .stat-label { font-size: 16px; color: #a0a5c0; }
         .features { padding: 60px 0; }
-        .section-title { text-align: center; font-size: 36px; margin-bottom: 50px; background: linear-gradient(135deg, #ffffff, #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .section-title { text-align: center; font-size: 36px; margin-bottom: 50px; background: linear-gradient(135deg, #ffffff, var(--primary-teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 30px; }
         .feature-card {
-            background: rgba(26,31,58,0.6); border-radius: 20px; padding: 30px; transition: all 0.3s;
+            background: rgba(13,27,48,0.6); border-radius: 20px; padding: 30px; transition: all 0.3s;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .feature-card:hover { border-color: #00ff88; transform: translateY(-5px); background: rgba(26,31,58,0.8); }
+        .feature-card:hover { border-color: var(--primary-teal); transform: translateY(-5px); background: rgba(13,27,48,0.8); }
         .feature-icon { font-size: 48px; margin-bottom: 20px; }
         .feature-title { font-size: 22px; font-weight: 600; margin-bottom: 15px; }
         .feature-description { color: #a0a5c0; font-size: 14px; }
         .demo {
-            background: rgba(0,255,136,0.05); border-radius: 30px; padding: 60px; margin: 60px 0;
-            border: 1px solid rgba(0,255,136,0.2);
+            background: rgba(0,168,107,0.05); border-radius: 30px; padding: 60px; margin: 60px 0;
+            border: 1px solid rgba(0,168,107,0.2);
         }
         .demo-title { font-size: 28px; margin-bottom: 20px; text-align: center; }
         .demo-form { max-width: 600px; margin: 0 auto; }
         .demo-input {
-            width: 100%; padding: 15px; background: rgba(26,31,58,0.8); border: 2px solid rgba(0,255,136,0.3);
+            width: 100%; padding: 15px; background: rgba(13,27,48,0.8); border: 2px solid rgba(0,168,107,0.3);
             border-radius: 12px; color: white; font-size: 16px; margin-bottom: 20px; resize: vertical;
         }
-        .demo-input:focus { outline: none; border-color: #00ff88; }
+        .demo-input:focus { outline: none; border-color: var(--primary-teal); }
         .demo-result { margin-top: 30px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 12px; display: none; }
         .risk-score { font-size: 36px; font-weight: bold; margin: 10px 0; }
-        .risk-low { color: #00ff88; }
-        .risk-med { color: #ffaa00; }
-        .risk-high { color: #ff4444; }
-        .api-section { background: #0d1128; border-radius: 20px; padding: 40px; margin: 60px 0; }
+        .risk-low { color: var(--primary-teal); }
+        .risk-med { color: var(--accent-warning); }
+        .risk-high { color: var(--accent-error); }
+        .api-section { background: #0d1b30; border-radius: 20px; padding: 40px; margin: 60px 0; }
         .code-block {
-            background: #1a1f3a; padding: 20px; border-radius: 12px; overflow-x: auto;
+            background: var(--primary-dark); padding: 20px; border-radius: 12px; overflow-x: auto;
             font-family: 'Courier New', monospace; font-size: 14px; margin: 20px 0;
         }
         .footer { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 60px; text-align: center; color: #a0a5c0; }
-        .footer a { color: #00ff88; }
+        .footer a { color: var(--primary-teal); }
         @media (max-width: 768px) {
             .hero h1 { font-size: 36px; }
             .navbar { flex-direction: column; text-align: center; }
@@ -107,8 +121,8 @@
         }
         .spinner {
             display: inline-block; width: 20px; height: 20px;
-            border: 3px solid rgba(0,255,136,0.3); border-radius: 50%;
-            border-top-color: #00ff88; animation: spin 0.6s linear infinite;
+            border: 3px solid rgba(0,168,107,0.3); border-radius: 50%;
+            border-top-color: var(--primary-teal); animation: spin 0.6s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
@@ -212,7 +226,7 @@
                 <h2 class="section-title" style="margin-bottom:20px;">Simple API Integration</h2>
                 <p style="text-align:center;margin-bottom:30px;">Integrate aviation safety into your operations with our REST API</p>
                 <div class="code-block">
-                    <span style="color:#00ff88;">curl -X POST</span> /assess-flight \<br>
+                    <span style="color:var(--primary-teal);">curl -X POST</span> /assess-flight \<br>
                     &nbsp;&nbsp;-H "Authorization: Bearer \$TOKEN" \<br>
                     &nbsp;&nbsp;-H "Content-Type: application/json" \<br>
                     &nbsp;&nbsp;-d '{"scenario": "Night approach, pilot rested, light winds"}'
@@ -229,13 +243,14 @@
             </div>
         </section>
 
-        <footer class="footer">
-            <p>© 2026 SMS-Engine | Aviation Safety Intelligence System</p>
-            <p style="font-size:12px;margin-top:10px;">ICAO-aligned | IMSAFE + PAVE + Risk Matrix | Powered by Claude AI</p>
-            <p style="font-size:12px;margin-top:10px;">
-                <a href="/status/status.html">System Status</a> |
-                <a href="https://github.com/TSL-2026/sms-engine">GitHub</a>
-            </p>
+        <footer style="background: var(--primary-dark); color: white; padding: 2rem; text-align: center; margin-top: 3rem;">
+            <div class="footer-content">
+                <div class="footer-links" style="margin-bottom: 1rem;">
+                    <a href="/docs" style="color: white; margin: 0 1rem; text-decoration: none;">API Docs</a>
+                    <a href="/dashboard/" target="_blank" style="color: white; margin: 0 1rem; text-decoration: none;">Dashboard</a>
+                </div>
+                <p style="margin: 1rem 0 0; font-size: 0.9rem;">&copy; 2026 A project by Ghanshyam Acharya. All rights reserved.</p>
+            </div>
         </footer>
     </div>
 
@@ -285,7 +300,7 @@
                 const riskClass = riskLevel === 'low' ? 'risk-low' : riskLevel === 'medium' ? 'risk-med' : 'risk-high';
 
                 resultDiv.innerHTML = `
-                    <h3 style="color:#00ff88;margin-bottom:20px;">📊 Assessment Results</h3>
+                    <h3 style="color:var(--primary-teal);margin-bottom:20px;">📊 Assessment Results</h3>
                     <div style="display:grid;gap:15px;">
                         <div><strong>Decision:</strong><div class="risk-score ${riskClass}">${result.decision?.state || 'N/A'}</div></div>
                         <div><strong>Risk Score:</strong><div class="risk-score ${riskClass}">${result.risk_score || 0}/25</div></div>
@@ -324,11 +339,10 @@
         examples.forEach(example => {
             const b = document.createElement('button');
             b.textContent = '📝 Example';
-            b.style.background = 'rgba(0,255,136,0.1)';
-            b.style.border = '1px solid #00ff88';
-            b.style.borderRadius = '5px';
+            b.style.background = 'rgba(0,168,107,0.1)';
+            b.style.border = '1px solid #00a86b';
             b.style.padding = '5px 10px';
-            b.style.color = '#00ff88';
+            b.style.color = '#00a86b';
             b.style.cursor = 'pointer';
             b.style.fontSize = '12px';
             b.onclick = () => { document.getElementById('scenario-input').value = example; };

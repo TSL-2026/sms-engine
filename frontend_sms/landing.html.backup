@@ -5,156 +5,90 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AviaSafe SMS — ICAO-Aligned Safety Management System</title>
 <meta name="description" content="Enterprise safety management system aligned with ICAO Annex 19, Doc 9859, and Doc 10159. Convert hazard register data into proactive risk management for enhanced flight safety.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>✈</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --primary-dark: #0a2540;
-    --primary-blue: #0055a4;
-    --primary-light: #eef4ff;
-    --primary-teal: #00a86b;
-    --text-dark: #1a1a1a;
-    --text-light: #666666;
-    --border-light: #e0e0e0;
-    --bg-light: #f8f9fa;
-    --accent-warning: #ffc107;
-    --accent-error: #dc3545;
-    --accent-info: #17a2b8;
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: var(--font-family);
+    font-family: 'Inter', -apple-system, sans-serif;
     background: #ffffff;
-    color: var(--text-dark);
+    color: #1e293b;
     line-height: 1.7;
-    margin: 0;
-    padding-top: 0;
   }
-  main { padding-top: 20px; }
   .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-  .header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: var(--primary-dark);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-align: left;
-    flex-wrap: wrap;
+  nav {
+    padding: 20px 0; border-bottom: 1px solid #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
   }
-  .logo h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff;
-    text-align: left;
-    margin: 0;
-  }
-  .logo p {
-    font-size: 0.8rem;
-    color: #a0b4c8;
-    margin: 0;
-  }
-  .nav-links {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-  }
-  .nav-links a {
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0.5rem 0.75rem;
-    white-space: nowrap;
-  }
-  .nav-links a:hover {
-    color: var(--primary-light);
-  }
-  .dashboard-btn {
-    background: var(--primary-teal);
-    color: white;
-    padding: 0.5rem 1.25rem;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: background 0.2s;
-    display: inline-block;
-  }
-  .dashboard-btn:hover {
-    background: #008a56;
-  }
+  .logo { font-size: 24px; font-weight: 700; color: #1e3a5f; }
+  .logo span { color: #3b82f6; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { color: #475569; text-decoration: none; font-size: 14px; font-weight: 500; }
+  .nav-links a:hover { color: #1e3a5f; }
   .btn {
     display: inline-block; padding: 10px 24px; border-radius: 6px;
     text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s;
   }
-  .btn-primary { background: var(--primary-blue); color: #fff; }
-  .btn-primary:hover { background: #004080; }
-  .btn-outline { border: 2px solid var(--primary-blue); color: var(--primary-blue); }
-  .btn-outline:hover { background: var(--primary-light); }
+  .btn-primary { background: #1e3a5f; color: #fff; }
+  .btn-primary:hover { background: #152d4a; }
+  .btn-outline { border: 1.5px solid #1e3a5f; color: #1e3a5f; }
+  .btn-outline:hover { background: #f8fafc; }
 
   .hero {
     padding: 100px 0 80px; text-align: center;
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-light) 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   }
-  .hero h1 { font-size: 48px; font-weight: 800; color: var(--primary-dark); margin-bottom: 20px; line-height: 1.2; }
-  .hero h1 span { color: var(--primary-blue); }
-  .hero p { font-size: 18px; color: var(--text-light); max-width: 760px; margin: 0 auto 32px; }
+  .hero h1 { font-size: 48px; font-weight: 800; color: #1e3a5f; margin-bottom: 20px; line-height: 1.2; }
+  .hero h1 span { color: #3b82f6; }
+  .hero p { font-size: 18px; color: #475569; max-width: 760px; margin: 0 auto 32px; }
   .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
   .section { padding: 80px 0; }
-  .section-alt { background: var(--primary-light); }
-  .label { font-size: 13px; font-weight: 600; color: var(--primary-blue); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .section-title { font-size: 32px; font-weight: 700; color: var(--primary-dark); margin-bottom: 16px; }
-  .section-sub { font-size: 16px; color: var(--text-light); max-width: 680px; margin-bottom: 48px; }
+  .section-alt { background: #f8fafc; }
+  .label { font-size: 13px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .section-title { font-size: 32px; font-weight: 700; color: #1e3a5f; margin-bottom: 16px; }
+  .section-sub { font-size: 16px; color: #64748b; max-width: 680px; margin-bottom: 48px; }
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-  .two-col .text h3 { font-size: 22px; font-weight: 600; color: var(--primary-dark); margin-bottom: 16px; }
-  .two-col .text p { color: var(--text-light); margin-bottom: 16px; font-size: 15px; }
-  .two-col .visual { background: var(--bg-light); border-radius: 12px; padding: 40px; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+  .two-col .text h3 { font-size: 22px; font-weight: 600; color: #1e3a5f; margin-bottom: 16px; }
+  .two-col .text p { color: #475569; margin-bottom: 16px; font-size: 15px; }
+  .two-col .visual { background: #f1f5f9; border-radius: 12px; padding: 40px; min-height: 300px; display: flex; align-items: center; justify-content: center; }
 
   .standards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
   .standard-card {
-    background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 32px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 32px;
     transition: box-shadow 0.2s;
   }
   .standard-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-  .standard-card .num { font-size: 36px; font-weight: 800; color: var(--primary-blue); }
-  .standard-card h4 { font-size: 18px; font-weight: 600; color: var(--primary-dark); margin: 12px 0 8px; }
-  .standard-card p { font-size: 14px; color: var(--text-light); line-height: 1.6; }
+  .standard-card .num { font-size: 36px; font-weight: 800; color: #3b82f6; }
+  .standard-card h4 { font-size: 18px; font-weight: 600; color: #1e3a5f; margin: 12px 0 8px; }
+  .standard-card p { font-size: 14px; color: #64748b; line-height: 1.6; }
 
   .workflow { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; margin: 48px 0; }
   .workflow-step { text-align: center; padding: 24px; position: relative; }
-  .workflow-step .icon { width: 48px; height: 48px; background: var(--primary-blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px; font-weight: 700; }
-  .workflow-step h4 { font-size: 15px; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; }
-  .workflow-step p { font-size: 13px; color: var(--text-light); }
+  .workflow-step .icon { width: 48px; height: 48px; background: #1e3a5f; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px; font-weight: 700; }
+  .workflow-step h4 { font-size: 15px; font-weight: 600; color: #1e3a5f; margin-bottom: 8px; }
+  .workflow-step p { font-size: 13px; color: #64748b; }
 
   .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 40px; }
   .metric-card { text-align: center; padding: 32px; }
-  .metric-card .num { font-size: 40px; font-weight: 800; color: var(--primary-dark); }
-  .metric-card .label { font-size: 14px; color: var(--text-light); margin-top: 4px; text-transform: none; letter-spacing: 0; }
+  .metric-card .num { font-size: 40px; font-weight: 800; color: #1e3a5f; }
+  .metric-card .label { font-size: 14px; color: #64748b; margin-top: 4px; text-transform: none; letter-spacing: 0; }
 
   .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .feature-card { background: #fff; border: 1px solid var(--border-light); border-radius: 10px; padding: 28px; }
+  .feature-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 28px; }
   .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
-  .feature-card h4 { font-size: 16px; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; }
-  .feature-card p { font-size: 14px; color: var(--text-light); }
+  .feature-card h4 { font-size: 16px; font-weight: 600; color: #1e3a5f; margin-bottom: 8px; }
+  .feature-card p { font-size: 14px; color: #64748b; }
 
-  .cta { background: var(--primary-dark); color: #fff; text-align: center; padding: 80px 0; }
+  .cta { background: #1e3a5f; color: #fff; text-align: center; padding: 80px 0; }
   .cta h2 { font-size: 32px; font-weight: 700; margin-bottom: 16px; }
-  .cta p { font-size: 16px; color: #a0b4c8; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
-  .cta .btn { background: var(--primary-teal); color: #fff; }
-  .cta .btn:hover { background: #008a56; }
+  .cta p { font-size: 16px; color: #94a3b8; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
+  .cta .btn { background: #fff; color: #1e3a5f; }
+  .cta .btn:hover { background: #f1f5f9; }
 
-  footer { padding: 40px 0; border-top: 1px solid var(--border-light); text-align: center; font-size: 13px; color: var(--text-light); }
-  footer a { color: var(--primary-blue); text-decoration: none; }
+  footer { padding: 40px 0; border-top: 1px solid #e2e8f0; text-align: center; font-size: 13px; color: #94a3b8; }
+  footer a { color: #3b82f6; text-decoration: none; }
 
   @media (max-width: 768px) {
     .hero h1 { font-size: 32px; }
@@ -163,14 +97,12 @@
     .features-grid { grid-template-columns: 1fr; }
     .metrics-grid { grid-template-columns: repeat(2, 1fr); }
     .workflow { grid-template-columns: 1fr 1fr; }
-    .header { flex-direction: column; gap: 1rem; }
-    .nav-links { flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
-    .nav-links a { padding: 0.4rem 0.6rem; font-size: 0.9rem; }
+    nav { flex-direction: column; gap: 16px; }
   }
 
   .matrix-mini { font-size: 13px; border-collapse: collapse; width: 100%; }
-  .matrix-mini th { background: var(--primary-dark); color: #fff; padding: 8px 12px; font-size: 12px; text-align: center; }
-  .matrix-mini td { padding: 8px 12px; text-align: center; border: 1px solid var(--border-light); font-weight: 600; font-size: 13px; }
+  .matrix-mini th { background: #1e3a5f; color: #fff; padding: 8px 12px; font-size: 12px; text-align: center; }
+  .matrix-mini td { padding: 8px 12px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600; font-size: 13px; }
   .matrix-mini .i { background: #fee2e2; color: #dc2626; }
   .matrix-mini .t { background: #fef3c7; color: #d97706; }
   .matrix-mini .a { background: #dcfce7; color: #16a34a; }
@@ -178,27 +110,26 @@
 </head>
 <body>
 
-<div class="header">
-    <div class="logo">
-        <h1>AviaSafe SMS</h1>
-        <p style="font-size: 0.8rem; color: #666;">ICAO Annex 19 / Doc 9859 Compliant</p>
-    </div>
+<div class="container">
+  <nav>
+    <div class="logo">Avia<span>Safe</span> SMS</div>
     <div class="nav-links">
-        <a href="#standards">Standards</a>
-        <a href="#workflow">Workflow</a>
-        <a href="#features">Features</a>
-        <a href="#why-icao">Why ICAO</a>
-        <a href="/dashboard/login.html" class="dashboard-btn" style="background: var(--primary-teal);">Launch Dashboard</a>
+      <a href="#standards">Standards</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#features">Features</a>
+      <a href="#why">Why ICAO</a>
+      <a href="/docs" target="_blank">API Docs</a>
+      <a href="/dashboard/" class="btn btn-primary">Launch Dashboard</a>
     </div>
+  </nav>
 </div>
 
-<main>
 <section class="hero">
   <div class="container">
     <h1>From Hazard Register to<br><span>Proactive Risk Management</span></h1>
     <p>A safety management system aligned with ICAO Annex&nbsp;19 (2nd&nbsp;Edition), Doc&nbsp;9859, and Doc&nbsp;10159 — converting reported hazards into structured corrective actions that continuously improve flight safety.</p>
     <div class="hero-buttons">
-      <a href="/dashboard/login.html" class="btn btn-primary">Explore Dashboard</a>
+      <a href="/dashboard/" class="btn btn-primary">Explore Dashboard</a>
       <a href="#standards" class="btn btn-outline">The ICAO Framework</a>
     </div>
   </div>
@@ -269,7 +200,7 @@
   </div>
 </section>
 
-<section class="section" id="why-icao">
+<section class="section" id="why">
   <div class="container">
     <div class="two-col">
       <div class="visual">
@@ -280,7 +211,7 @@
           <tr><th>3</th><td class="i">3A</td><td class="t">3B</td><td class="t">3C</td><td class="a">3D</td><td class="a">3E</td></tr>
           <tr><th>2</th><td class="t">2A</td><td class="t">2B</td><td class="a">2C</td><td class="a">2D</td><td class="a">2E</td></tr>
           <tr><th>1</th><td class="a">1A</td><td class="a">1B</td><td class="a">1C</td><td class="a">1D</td><td class="a">1E</td></tr>
-          <tr><td colspan="6" style="font-size:11px;padding:8px;color:var(--icao-text-light);text-align:left;">
+          <tr><td colspan="6" style="font-size:11px;padding:8px;color:#64748b;text-align:left;">
             <span style="color:#dc2626;font-weight:600;">■</span> Intolerable
             <span style="color:#d97706;font-weight:600;margin-left:12px;">■</span> Tolerable
             <span style="color:#16a34a;font-weight:600;margin-left:12px;">■</span> Acceptable
@@ -361,7 +292,7 @@
         <h3>Converting Hazard Data into Safety Intelligence</h3>
         <p>A hazard register is not a static archive — it is a live intelligence resource. Every report, risk assessment, corrective action, and closure verification generates data that feeds the continuous improvement cycle.</p>
         <p>AviaSafe SMS transforms raw hazard records into actionable safety intelligence, enabling organizations to:</p>
-        <ul style="color:var(--text-light);font-size:15px;margin-top:16px;padding-left:20px;">
+        <ul style="color:#475569;font-size:15px;margin-top:16px;padding-left:20px;">
           <li style="margin-bottom:8px;">Identify systemic risk patterns before they cause incidents</li>
           <li style="margin-bottom:8px;">Demonstrate regulatory compliance with auditable records</li>
           <li style="margin-bottom:8px;">Allocate resources to the highest-priority safety risks</li>
@@ -369,11 +300,11 @@
           <li style="margin-bottom:8px;">Build a safety culture grounded in data, not intuition</li>
         </ul>
       </div>
-      <div class="visual" style="background:var(--bg-light);border-radius:12px;padding:40px;min-height:280px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+      <div class="visual" style="background:#f1f5f9;border-radius:12px;padding:40px;min-height:280px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
         <div style="font-size:48px;">⭯</div>
         <div style="text-align:center;">
-          <div style="font-size:14px;font-weight:600;color:var(--primary-dark);">Continuous Improvement Cycle</div>
-          <div style="font-size:12px;color:var(--text-light);margin-top:8px;">Report → Assess → Act → Verify → Improve</div>
+          <div style="font-size:14px;font-weight:600;color:#1e3a5f;">Continuous Improvement Cycle</div>
+          <div style="font-size:12px;color:#64748b;margin-top:8px;">Report → Assess → Act → Verify → Improve</div>
         </div>
       </div>
     </div>
@@ -384,22 +315,15 @@
   <div class="container">
     <h2>Ready to Operationalize Your SMS?</h2>
     <p>AviaSafe SMS is deployed and accessible for demonstration. Explore the dashboard, test the API, or reach out for a guided walkthrough.</p>
-    <a href="/dashboard/login.html" class="btn" style="background:var(--primary-teal);color:#fff;">Launch Dashboard →</a>
+    <a href="/dashboard/" class="btn" style="background:#fff;color:#1e3a5f;">Launch Dashboard →</a>
   </div>
 </section>
-</main>
 
-<footer style="background: var(--primary-dark); color: white; padding: 2rem; text-align: center; margin-top: 3rem;">
-    <div class="footer-content">
-        <div class="footer-links" style="margin-bottom: 1rem;">
-            <a href="/docs" style="color: white; margin: 0 1rem; text-decoration: none;">API Docs</a>
-            <a href="#standards" style="color: white; margin: 0 1rem; text-decoration: none;">Standards</a>
-            <a href="#workflow" style="color: white; margin: 0 1rem; text-decoration: none;">Workflow</a>
-            <a href="#features" style="color: white; margin: 0 1rem; text-decoration: none;">Features</a>
-            <a href="#why-icao" style="color: white; margin: 0 1rem; text-decoration: none;">Why ICAO</a>
-        </div>
-        <p style="margin: 1rem 0 0; font-size: 0.9rem;">&copy; 2026 A project by Ghanshyam Acharya. All rights reserved.</p>
-    </div>
+<footer>
+  <div class="container">
+    <p>© 2026 AviaSafe SMS — Built to ICAO Annex&nbsp;19 (2nd&nbsp;Edition), Doc&nbsp;9859, and Doc&nbsp;10159</p>
+    <p style="margin-top:8px;"><a href="/docs">API Documentation</a> · <a href="/dashboard">Dashboard</a> · <a href="https://github.com/TSL-2026/sms-engine">GitHub</a></p>
+  </div>
 </footer>
 
 </body>
